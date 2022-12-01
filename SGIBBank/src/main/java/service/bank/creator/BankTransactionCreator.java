@@ -1,7 +1,7 @@
 package service.bank.creator;
 
 import data.BankTransaction;
-import service.TransactionType.TransactionType;
+import service.transactiontype.TransactionType;
 
 import java.math.BigDecimal;
 

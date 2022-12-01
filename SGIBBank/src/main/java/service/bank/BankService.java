@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface BankService {
     void deposit(UUID accountId, BigDecimal amount) throws InvalidOperationException;
+    BigDecimal withdraw(UUID accountId, BigDecimal amount) throws InvalidOperationException;
 }
