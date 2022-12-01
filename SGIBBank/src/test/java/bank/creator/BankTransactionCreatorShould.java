@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import service.TransactionType.TransactionType;
+import service.transactiontype.TransactionType;
 import service.bank.creator.SGIBTransactionCreator;
 
 import java.math.RoundingMode;
@@ -22,14 +22,14 @@ import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@DisplayName("factory should")
+@DisplayName("Bank transaction creator should")
 @ExtendWith(MockitoExtension.class)
 public class BankTransactionCreatorShould {
     @Mock
     private Supplier<LocalDateTime> timeSupplier;
 
     @InjectMocks
-    private SGIBTransactionCreator creator;
+    private SGIBTransactionCreator transactionCreator;
 
     @ParameterizedTest(name = "{0}")
     @DisplayName("create with specific date")
@@ -37,7 +37,7 @@ public class BankTransactionCreatorShould {
     void returnFirstDate(String timeName, LocalDateTime timeRef){
         doReturn(timeRef).when(timeSupplier).get();
 
-        assertThat(creator.create(TransactionType.DEPOSIT, ZERO, ZERO))
+        assertThat(transactionCreator.create(TransactionType.DEPOSIT, ZERO, ZERO))
                 .isEqualTo(new BankTransaction(TransactionType.DEPOSIT,
                         timeRef,
                         ZERO.setScale(2, RoundingMode.HALF_UP),

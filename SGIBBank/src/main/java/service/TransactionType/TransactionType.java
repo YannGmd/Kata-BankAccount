@@ -1,5 +1,5 @@
-package service.TransactionType;
+package service.transactiontype;
 
 public enum TransactionType {
-    DEPOSIT
+    DEPOSIT, WITHDRAW
 }
