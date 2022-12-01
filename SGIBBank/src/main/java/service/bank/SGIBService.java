@@ -3,6 +3,7 @@ package service.bank;
 import data.BankTransaction;
 import repository.TransactionRepository;
 import service.TransactionType.TransactionType;
+import service.bank.creator.BankTransactionCreator;
 import service.exception.InvalidOperationException;
 
 import java.math.BigDecimal;
@@ -13,14 +14,15 @@ import java.util.function.Supplier;
 
 import static java.math.BigDecimal.ZERO;
 import static java.util.Objects.requireNonNull;
+import static service.TransactionType.TransactionType.DEPOSIT;
 
 public class SGIBService implements BankService {
     private final TransactionRepository repository;
-    private final Supplier<LocalDateTime> timeSupplier;
+    private final BankTransactionCreator creator;
 
-    public SGIBService(TransactionRepository repository, Supplier<LocalDateTime> timeSupplier){
+    public SGIBService(TransactionRepository repository, BankTransactionCreator creator){
         this.repository = requireNonNull(repository);
-        this.timeSupplier = timeSupplier;
+        this.creator = creator;
     }
 
     @Override
@@ -29,14 +31,13 @@ public class SGIBService implements BankService {
             throw new InvalidOperationException("Cannot deposit negative amount");
         }
 
-        repository.add(accountId, new BankTransaction(
-                TransactionType.DEPOSIT,
-                timeSupplier.get(),
-                amount.setScale(2, RoundingMode.HALF_UP),
+        repository.add(accountId, creator.create(
+                DEPOSIT,
+                amount,
                 repository.getLast(accountId)
                         .map(BankTransaction::balance)
                         .orElse(ZERO)
-                        .add(amount).setScale(2, RoundingMode.HALF_UP)
-        ));
+                        .add(amount))
+        );
     }
 }

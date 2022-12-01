@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import repository.TransactionRepository;
 import service.bank.SGIBService;
+import service.bank.creator.BankTransactionCreator;
 import service.exception.InvalidOperationException;
 
 import java.math.RoundingMode;
@@ -33,6 +34,9 @@ public class BankServiceTest {
     @Mock
     private Supplier<LocalDateTime> timeSupplier;
 
+    @Mock
+    private BankTransactionCreator creator;
+
     @InjectMocks
     private SGIBService service;
 
@@ -42,28 +46,24 @@ public class BankServiceTest {
     @Test
     @DisplayName("allow deposit")
     void allowDeposit(){
-        var createdTransaction = new BankTransaction(
-                DEPOSIT,
-                timeRef,
-                ONE.setScale(2, RoundingMode.HALF_UP),
-                ONE.setScale(2, RoundingMode.HALF_UP)
-        );
+        var createdTransaction = new BankTransaction(DEPOSIT, timeRef, ONE, ONE);
 
         doReturn(Optional.empty()).when(repository).getLast(any());
-        doReturn(timeRef).when(timeSupplier).get();
+        doReturn(createdTransaction).when(creator).create(any(), any(), any());
 
         assertDoesNotThrow(() -> service.deposit(customerId, ONE));
 
-        var checkOrder = inOrder(repository);
+        var checkOrder = inOrder(repository, creator);
         checkOrder.verify(repository).getLast(customerId);
+        checkOrder.verify(creator).create(DEPOSIT, ONE, ONE);
         checkOrder.verify(repository).add(customerId, createdTransaction);
         checkOrder.verifyNoMoreInteractions();
     }
 
     @Test
-    @DisplayName("throw erreor on deposit with negative amounts")
+    @DisplayName("throw error on deposit with negative amounts")
     void throwOnNegativeAmountDeposit(){
         assertThrows(InvalidOperationException.class, () -> service.deposit(customerId, ONE.negate()));
-        verifyNoInteractions(repository, timeSupplier);
+        verifyNoInteractions(repository, creator);
     }
 }
