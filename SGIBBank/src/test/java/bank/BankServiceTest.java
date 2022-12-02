@@ -11,9 +11,11 @@ import repository.TransactionRepository;
 import service.bank.SGIBService;
 import service.bank.creator.BankTransactionCreator;
 import service.exception.InvalidOperationException;
+import service.print.Printer;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -41,6 +43,9 @@ public class BankServiceTest {
     @InjectMocks
     private SGIBService bankService;
 
+    @Mock
+    private Printer printer;
+
     private final UUID customerId = UUID.randomUUID();
     private final LocalDateTime timeRef = LocalDateTime.now();
 
@@ -54,7 +59,7 @@ public class BankServiceTest {
 
         assertDoesNotThrow(() -> bankService.deposit(customerId, ONE));
 
-        var checkOrder = inOrder(transactionRepository, transactionCreator);
+        var checkOrder = inOrder(transactionRepository, transactionCreator, printer);
         checkOrder.verify(transactionRepository).getLast(customerId);
         checkOrder.verify(transactionCreator).create(DEPOSIT, ONE, ONE);
         checkOrder.verify(transactionRepository).add(customerId, createdTransaction);
@@ -65,7 +70,7 @@ public class BankServiceTest {
     @DisplayName("throw error on deposit with negative amounts")
     void throwOnNegativeAmountDeposit(){
         assertThrows(InvalidOperationException.class, () -> bankService.deposit(customerId, ONE.negate()));
-        verifyNoInteractions(transactionRepository, transactionCreator);
+        verifyNoInteractions(transactionRepository, transactionCreator, printer);
     }
 
     @Test
@@ -80,7 +85,7 @@ public class BankServiceTest {
         var withdrew = assertDoesNotThrow(() -> bankService.withdraw(customerId, ONE));
         assertEquals(ONE, withdrew);
 
-        var checkOrder = inOrder(transactionRepository, transactionCreator);
+        var checkOrder = inOrder(transactionRepository, transactionCreator, printer);
         checkOrder.verify(transactionRepository).getLast(customerId);
         checkOrder.verify(transactionCreator).create(WITHDRAW, ONE, BigDecimal.valueOf(9L));
         checkOrder.verify(transactionRepository).add(customerId, createdTransaction);
@@ -93,7 +98,7 @@ public class BankServiceTest {
         assertThrows(InvalidOperationException.class,
                 () -> bankService.withdraw(customerId, ONE.negate()));
 
-        verifyNoInteractions(transactionRepository, transactionCreator);
+        verifyNoInteractions(transactionRepository, transactionCreator, printer);
     }
 
     @Test
@@ -107,6 +112,24 @@ public class BankServiceTest {
 
         verify(transactionRepository).getLast(customerId);
         verifyNoMoreInteractions(transactionRepository);
-        verifyNoInteractions(transactionCreator);
+        verifyNoInteractions(transactionCreator, printer);
+    }
+
+    @Test
+    @DisplayName("print history")
+    void printHistory(){
+        var deposit = new BankTransaction(DEPOSIT, timeRef, TEN, TEN);
+        var withdraw = new BankTransaction(WITHDRAW, timeRef, ONE, BigDecimal.valueOf(9L));
+        List<BankTransaction> transactions = List.of(deposit, withdraw);
+        doNothing().when(printer).print(any());
+
+        doReturn(transactions).when(transactionRepository).getAll(any());
+        bankService.printHistory(customerId, printer);
+
+        var checkOrder = inOrder(transactionRepository, printer, transactionCreator);
+        checkOrder.verify(transactionRepository).getAll(customerId);
+        checkOrder.verify(printer).print(deposit);
+        checkOrder.verify(printer).print(withdraw);
+        checkOrder.verifyNoMoreInteractions();
     }
 }

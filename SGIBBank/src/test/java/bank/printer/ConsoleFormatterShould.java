@@ -98,6 +98,6 @@ public class ConsoleFormatterShould {
         var checkOrder = inOrder(formatter);
         checkOrder.verify(formatter).apply(deposit);
         checkOrder.verify(formatter).apply(withdraw);
-        verifyNoMoreInteractions(formatter);
+        checkOrder.verifyNoMoreInteractions();
     }
 }
