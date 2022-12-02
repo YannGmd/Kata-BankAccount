@@ -4,6 +4,7 @@ import data.BankTransaction;
 import repository.TransactionRepository;
 import service.bank.creator.BankTransactionCreator;
 import service.exception.InvalidOperationException;
+import service.print.Printer;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -47,6 +48,12 @@ public class SGIBService implements BankService {
 
         transactionRepository.add(accountId, transactionCreator.create(WITHDRAW, amount, currentBalance.subtract(amount)));
         return amount;
+    }
+
+
+    @Override
+    public void printHistory(UUID accountId, Printer printer) {
+        transactionRepository.getAll(accountId).forEach(printer::print);
     }
 
     private void checkNegativeAmount(BigDecimal amount) throws InvalidOperationException {
