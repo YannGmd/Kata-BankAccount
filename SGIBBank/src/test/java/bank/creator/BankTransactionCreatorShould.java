@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import service.transactiontype.TransactionType;
+import service.bank.TransactionType;
 import service.bank.creator.SGIBTransactionCreator;
 
 import java.math.RoundingMode;

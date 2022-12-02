@@ -23,8 +23,8 @@ import static java.math.BigDecimal.ZERO;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static service.transactiontype.TransactionType.DEPOSIT;
-import static service.transactiontype.TransactionType.WITHDRAW;
+import static service.bank.TransactionType.DEPOSIT;
+import static service.bank.TransactionType.WITHDRAW;
 
 @DisplayName("Bank service should")
 @ExtendWith(MockitoExtension.class)
