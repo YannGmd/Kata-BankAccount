@@ -10,8 +10,8 @@ import java.util.UUID;
 
 import static java.math.BigDecimal.ZERO;
 import static java.util.Objects.requireNonNull;
-import static service.transactiontype.TransactionType.DEPOSIT;
-import static service.transactiontype.TransactionType.WITHDRAW;
+import static service.bank.TransactionType.DEPOSIT;
+import static service.bank.TransactionType.WITHDRAW;
 
 public class SGIBService implements BankService {
     private final TransactionRepository transactionRepository;

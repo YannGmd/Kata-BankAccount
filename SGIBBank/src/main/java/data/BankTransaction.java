@@ -1,6 +1,6 @@
 package data;
 
-import service.transactiontype.TransactionType;
+import service.bank.TransactionType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
